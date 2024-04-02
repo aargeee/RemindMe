@@ -2,3 +2,7 @@
 select = ["ALL"]
 ignore = []
 line-length = 150
+exclude = [
+    "migrations",
+    "manage.py",
+]
