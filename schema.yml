@@ -1,0 +1,27 @@
+openapi: 3.0.3
+info:
+  title: Remind Me API
+  version: 1.0.0
+  description: Your Daily reminder application
+paths:
+  /api/reminder:
+    get:
+      operationId: api_reminder_retrieve
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
