@@ -4,9 +4,13 @@ info:
   version: 1.0.0
   description: Your Daily reminder application
 paths:
-  /api/reminder:
+  /api/reminder/:
     get:
       operationId: api_reminder_retrieve
+      description: |-
+        GET method.
+
+        Returns list of reminders.
       tags:
       - api
       security:
@@ -15,6 +19,38 @@ paths:
       - {}
       responses:
         '200':
+          description: No response body
+    post:
+      operationId: api_reminder_create
+      description: 'POST: create new reminder.'
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/reminder/{reminder_id}/:
+    delete:
+      operationId: api_reminder_destroy
+      description: Delete method.
+      parameters:
+      - in: path
+        name: reminder_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
           description: No response body
 components:
   securitySchemes:

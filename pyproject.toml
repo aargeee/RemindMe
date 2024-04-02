@@ -7,3 +7,6 @@ exclude = [
     "manage.py",
     "__pycache__",
 ]
+
+[tool.ruff.lint]
+ignore = ["S101", "TRY003", "EM101", "PT009"]
