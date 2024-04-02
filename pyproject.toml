@@ -5,4 +5,5 @@ line-length = 150
 exclude = [
     "migrations",
     "manage.py",
+    "__pycache__",
 ]
