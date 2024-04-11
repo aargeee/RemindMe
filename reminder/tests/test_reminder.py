@@ -75,8 +75,7 @@ class TestReminderView(APITestCase):
             self.url,
             data={
                 "reminder_title": "Test Title 3",
-                "end_date_time": datetime.datetime.now(tz=datetime.timezone.utc)
-                + datetime.timedelta(days=4),
+                "end_date_time": "2054-04-11T22:15:13Z",
             },
         )
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -86,11 +85,107 @@ class TestReminderView(APITestCase):
         self.assertEqual(obj.count(), 1)
         self.assertEqual(obj[0]["reminder_title"], "Test Title 3")
 
+    def test_post_creates_reminder_seconds(self: TestReminderView) -> None:
+        """POST request creates a reminder."""
+        self.client.force_authenticate(user=self.user)
+        self.assertEqual(Reminder.objects.all().count(), 2)
+        res: Response = self.client.post(
+            self.url,
+            data={
+                "reminder_title": "Test Title 3",
+                "end_date_time": "2054-04-11T22:15:13Z",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED, res.data)
+        self.assertEqual(Reminder.objects.all().count(), 3)
+        self.assertIn("id", res.data)
+        obj = Reminder.objects.filter(id=res.data["id"]).values()
+        self.assertEqual(obj.count(), 1)
+        self.assertEqual(obj[0]["reminder_title"], "Test Title 3")
+
+    def test_post_creation_wrong_data(self: TestReminderView) -> None:
+        """POST request creates a reminder."""
+        self.client.force_authenticate(user=self.user)
+        self.assertEqual(Reminder.objects.all().count(), 2)
+        res: Response = self.client.post(
+            self.url,
+            data={
+                "reminder_title": "Test Title 3",
+                "end_date_time": datetime.datetime.now(tz=datetime.timezone.utc)
+                - datetime.timedelta(days=4),
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Reminder.objects.all().count(), 2)
+        self.assertTrue("errors" in res.data)
+        self.assertEqual(len(res.data["errors"]), 1)
+        self.assertTrue("code" in res.data["errors"][0])
+        self.assertTrue("detail" in res.data["errors"][0])
+        self.assertTrue("attr" in res.data["errors"][0])
+
+    def test_post_creation_wrong_data_seconds(self: TestReminderView) -> None:
+        """POST request creates a reminder."""
+        self.client.force_authenticate(user=self.user)
+        self.assertEqual(Reminder.objects.all().count(), 2)
+        res: Response = self.client.post(
+            self.url,
+            data={
+                "reminder_title": "Test Title 3",
+                "end_date_time": datetime.datetime.now(tz=datetime.timezone.utc)
+                - datetime.timedelta(seconds=1),
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Reminder.objects.all().count(), 2)
+        self.assertTrue("errors" in res.data)
+        self.assertEqual(len(res.data["errors"]), 1)
+        self.assertTrue("code" in res.data["errors"][0])
+        self.assertTrue("detail" in res.data["errors"][0])
+        self.assertTrue("attr" in res.data["errors"][0])
+
     def test_post_no_data(self: TestReminderView) -> None:
         """POST request with wrong or missing data."""
         self.client.force_authenticate(user=self.user)
         res = self.client.post(self.url)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_empty_title(self: TestReminderView) -> None:
+        """Test empty title."""
+        self.client.force_authenticate(user=self.user)
+        self.assertEqual(Reminder.objects.all().count(), 2)
+        res: Response = self.client.post(
+            self.url,
+            data={
+                "reminder_title": "",
+                "end_date_time": "2054-04-11T22:15:13Z",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Reminder.objects.all().count(), 2)
+        self.assertTrue("errors" in res.data)
+        self.assertEqual(len(res.data["errors"]), 1)
+        self.assertTrue("code" in res.data["errors"][0])
+        self.assertTrue("detail" in res.data["errors"][0])
+        self.assertTrue("attr" in res.data["errors"][0])
+
+    def test_incorrect_datetime_format(self: TestReminderView) -> None:
+        """Test empty title."""
+        self.client.force_authenticate(user=self.user)
+        self.assertEqual(Reminder.objects.all().count(), 2)
+        res: Response = self.client.post(
+            self.url,
+            data={
+                "reminder_title": "Title",
+                "end_date_time": "somethingwrong",
+            },
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Reminder.objects.all().count(), 2)
+        self.assertTrue("errors" in res.data)
+        self.assertEqual(len(res.data["errors"]), 1)
+        self.assertTrue("code" in res.data["errors"][0])
+        self.assertTrue("detail" in res.data["errors"][0])
+        self.assertTrue("attr" in res.data["errors"][0])
 
 
 class TestDeleteReminderView(APITestCase):
