@@ -29,7 +29,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG") == "True"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", *os.getenv("DJANGO_ALLOWED_HOSTS")]
 
 
 # Application definition
@@ -145,11 +145,10 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "Remind Me API",
     "DESCRIPTION": "Your Daily reminder application",
-    "VERSION": "1.0.0",
+    "VERSION": "1.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-CORS_ALLOWED_ORIGIN_REGEXES = [r"http:\/\/localhost:[0-9]+"]
 CORS_ALLOWED_ORIGINS = [os.getenv("ALLOWED_ORIGINS")]
 
 AUTH_PASSWORD_VALIDATORS = [
