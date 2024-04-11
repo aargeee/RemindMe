@@ -6,10 +6,10 @@ import typing
 from typing import TYPE_CHECKING
 
 from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -22,20 +22,36 @@ if TYPE_CHECKING:
 class SignupView(APIView):
     """Signup view for RemindMe API."""
 
+    permission_classes: typing.ClassVar = [AllowAny]
+
     def post(self: SignupView, request: Request) -> Response:
         """Signup."""
-        user = UserSerializer(data=request.data)
-        if not user.is_valid():
-            raise ValidationError(
-                detail=user.errors,
-                code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        serializer = UserSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "success": False,
+                    "data": {
+                        "errors": serializer.errors,
+                    },
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
             )
-        user.save()
-        user = User.objects.get(username=request.data["username"])
+
+        password: str = request.data["password"]
+        validate_password(password=password)
+        user: User = serializer.save()
         user.set_password(request.data["password"])
         user.save()
-        token = Token.objects.create(user=user)
-        return Response({"token": token.key}, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "success": True,
+                "data": {
+                    "detail": "User Created.",
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(APIView):
