@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import uuid
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -24,6 +25,7 @@ class Reminder(models.Model):
     """Reminder model to store the title and end-datetime of event."""
 
     id = models.UUIDField(editable=False, primary_key=True, default=uuid.uuid4)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     reminder_title = models.CharField(max_length=REMINDER_TITLE_MAXLEN)
     end_date_time = models.DateTimeField(validators=[validate_future_datetime])
 
