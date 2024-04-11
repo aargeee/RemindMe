@@ -2,12 +2,16 @@
 from __future__ import annotations
 
 import json
+from typing import TYPE_CHECKING
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+
+if TYPE_CHECKING:
+    from rest_framework.response import Response
 
 
 class TestSignUpView(APITestCase):
@@ -169,3 +173,60 @@ class TestSignUpView(APITestCase):
                 },
             },
         )
+
+
+class TestLoginView(APITestCase):
+    """Login Tests."""
+
+    def setUp(self: TestLoginView) -> None:
+        """Login tests Setup."""
+        self.url = reverse("login")
+        self.client = APIClient()
+        self.existing_user = User.objects.create_user(
+            username="test-user",
+            password="test-pass",  # noqa: S106
+        )
+
+    def test_login(self: TestLoginView) -> None:
+        """Test successful login."""
+        payload = {
+            "username": "test-user",
+            "password": "test-pass",
+        }
+        res: Response = self.client.post(self.url, data=payload)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(res.data["success"])
+        self.assertTrue("data" in res.data)
+        self.assertTrue("token" in res.data["data"])
+
+    def test_incorrect_username(self: TestLoginView) -> None:
+        """Test with incorrect username."""
+        payload = {
+            "username": "non-existing-user",
+            "password": "test-pass",
+        }
+        res: Response = self.client.post(self.url, data=payload)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse(res.data["success"])
+        self.assertTrue("data" in res.data)
+        self.assertTrue("detail" in res.data["data"])
+
+    def test_incorrect_password(self: TestLoginView) -> None:
+        """Test incorrect password."""
+        payload = {
+            "username": "test-user",
+            "password": "wrong-password",
+        }
+        res: Response = self.client.post(self.url, data=payload)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertFalse(res.data["success"])
+        self.assertTrue("data" in res.data)
+        self.assertTrue("detail" in res.data["data"])
+
+    def test_missing_credentials(self: TestLoginView) -> None:
+        """Test missing credentails."""
+        res: Response = self.client.post(self.url)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(res.data["success"])
+        self.assertTrue("data" in res.data)
+        self.assertTrue("detail" in res.data["data"])
