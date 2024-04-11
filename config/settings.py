@@ -149,7 +149,11 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-CORS_ALLOWED_ORIGINS = [os.getenv("ALLOWED_ORIGINS")]
+CORS_ALLOWED_ORIGINS = [
+    "https://doctorxeno.pythonanywhere.com",
+    "http://localhost:8000",
+    "http://localhost:5173",
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
