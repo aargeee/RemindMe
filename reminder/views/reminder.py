@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import typing
 from typing import TYPE_CHECKING
 
 from rest_framework import status
 from rest_framework.exceptions import APIException, ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -21,19 +23,24 @@ if TYPE_CHECKING:
 class ReminderView(APIView):
     """Reminder api view."""
 
-    def get(self: ReminderView, _request: Request) -> Response:
+    permission_classes: typing.ClassVar = [IsAuthenticated]
+
+    def get(self: ReminderView, request: Request) -> None:
         """GET method.
 
         Returns list of reminders.
         """
-        return Response(
-            data=ReminderSerializer(Reminder.objects.all(), many=True).data,
-            status=status.HTTP_200_OK,
-        )
+        user = request.user
+        reminders = Reminder.objects.filter(user=user)
+        serializer = ReminderSerializer(reminders, many=True)
+
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def post(self: ReminderView, request: Request) -> Response:
         """POST: create new reminder."""
-        serializer = ReminderSerializer(data=request.data)
+        data = request.data.copy()
+        data["user"] = request.user.id
+        serializer = ReminderSerializer(data=data)
 
         if not serializer.is_valid():
             raise ValidationError(

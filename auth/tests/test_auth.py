@@ -184,7 +184,7 @@ class TestLoginView(APITestCase):
         self.client = APIClient()
         self.existing_user = User.objects.create_user(
             username="test-user",
-            password="test-pass",  # noqa: S106
+            password="test-pass",
         )
 
     def test_login(self: TestLoginView) -> None:

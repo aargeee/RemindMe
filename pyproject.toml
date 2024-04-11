@@ -9,4 +9,4 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-ignore = ["S101", "TRY003", "EM101", "PT009", "PT027"]
+ignore = ["S101", "TRY003", "EM101", "PT009", "PT027", "S106"]

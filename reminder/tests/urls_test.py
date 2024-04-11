@@ -1,1 +1,0 @@
-"""Urls test module."""
