@@ -26,7 +26,7 @@ SECRET_KEY = (
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "doctorxeno.pythonanywhere.com"]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -172,4 +172,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 DRF_STANDARDIZED_ERRORS = {"ENABLE_IN_DEBUG_FOR_UNHANDLED_EXCEPTIONS": True}
 
-STATIC_ROOT = "static/"
+STATIC_URL = "static/"
+STATICFILES_DIRS = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR / "staticfiles"
